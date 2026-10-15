@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      # 默认上游：智谱 AI（GLM-4-Flash 免费模型）
+      - UPSTREAM_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+      - UPSTREAM_API_KEY=${UPSTREAM_API_KEY}
+      - DATABASE_URL=sqlite+aiosqlite:///./model_viz.db
+      - METRICS_WINDOW_SECONDS=5
+      - DATA_RETENTION_DAYS=7
+    volumes:
+      - db_data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5111:5111"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:
